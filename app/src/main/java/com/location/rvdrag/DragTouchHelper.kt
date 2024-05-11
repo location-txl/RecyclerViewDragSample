@@ -79,6 +79,19 @@ class DragTouchHelper(private val adapter: TestAdapter): ItemTouchHelper.Callbac
 //            adapter.addHeader(viewHolder.bindingAdapterPosition)
 //            payloadHolder = null
 //        }
+
+    }
+
+    override fun getAnimationDuration(
+        recyclerView: RecyclerView,
+        animationType: Int,
+        animateDx: Float,
+        animateDy: Float
+    ): Long {
+        if(payloadHolder != null){
+            return 0
+        }
+        return super.getAnimationDuration(recyclerView, animationType, animateDx, animateDy)
     }
 
     private var selectedViewHolder: RecyclerView.ViewHolder? = null
