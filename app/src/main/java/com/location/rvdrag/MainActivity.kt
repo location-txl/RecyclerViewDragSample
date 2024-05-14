@@ -20,25 +20,29 @@ class MainActivity : AppCompatActivity() {
         ),
         uiList = (20..100).map { TestData(it) }
     ) }
+    private val itemDecoration by lazy {             TestItemDecoration(testAdapter)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.test1.setOnClickListener {
-            testAdapter.appendHeader()
+
         }
         with(binding.rv){
             adapter = testAdapter
+            addItemDecoration(itemDecoration)
             layoutManager = TestGridLayoutManager(this@MainActivity, 3, testAdapter)
-            addItemDecoration(TestItemDecoration(testAdapter))
             TestItemTouchHelper(
                if(USE_PAYLOAD){
                    PayloadDragTouchHelper(testAdapter, layoutManager as GridLayoutManager)
                }else{
-                   DragTouchHelper(testAdapter, layoutManager as GridLayoutManager)
+                   DragTouchHelper(testAdapter, layoutManager as GridLayoutManager, itemDecoration, this)
                }
             ).apply {
                 attachToRecyclerView(this@with)
             }
+
+
         }
     }
 }

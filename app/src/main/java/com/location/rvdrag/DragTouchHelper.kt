@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.TestItemTouchHelper
  */
 class DragTouchHelper(
     private val adapter: TestAdapter,
-    private val gridLayoutManager: GridLayoutManager
+    private val gridLayoutManager: GridLayoutManager,
+    private val itemDecoration: TestItemDecoration,
+    private val recyclerView: RecyclerView,
     ): TestItemTouchHelper.Callback() {
     companion object{
         private const val TAG = "DragTouchHelper"
@@ -81,6 +83,7 @@ class DragTouchHelper(
     }
 
 
+
     override fun isLongPressDragEnabled(): Boolean {
         return true
     }
@@ -110,6 +113,35 @@ class DragTouchHelper(
         curX: Int,
         curY: Int
     ): RecyclerView.ViewHolder? {
+//        for (targetViewHolder in dropTargets) {
+//            if(targetViewHolder is TestAdapter.ItemViewHolder){
+//               if(
+//                   targetViewHolder.isHeader
+//                   && targetViewHolder.itemView.height /2f >= targetViewHolder.itemView.bottom - curY
+//                   ){
+//                   Log.i("abc", " is check done")
+//                   if(itemDecoration.showTopContainer.not()){
+////                       itemDecoration.showTopContainer = true
+////                       recyclerView.invalidateItemDecorations()
+//                   }
+//                   break
+//               }
+//            }
+//        }
+        if(selected.bindingAdapterPosition >= adapter.headerSize
+            && adapter.headerSize % TestAdapter.COLUMNS == 0){
+            val isShowContainer =  itemDecoration.showTopContainerRange?.contains(curY) == true
+            if(isShowContainer && itemDecoration.showTopContainer.not()) {
+                itemDecoration.showTopContainer = true
+                recyclerView.invalidateItemDecorations()
+            }else if(isShowContainer.not()
+                && itemDecoration.showTopContainer
+               ){
+                itemDecoration.showTopContainer = false
+                recyclerView.invalidateItemDecorations()
+            }
+        }
+
         return super.chooseDropTarget(selected, dropTargets, curX, curY)
     }
 
@@ -130,6 +162,14 @@ class DragTouchHelper(
             return true
         }else{
            return super.getTargetRect(viewHolder, outRect)
+        }
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        if(itemDecoration.showTopContainer){
+            itemDecoration.showTopContainer = false
+            recyclerView.invalidateItemDecorations()
         }
     }
 

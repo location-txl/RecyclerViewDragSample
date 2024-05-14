@@ -22,13 +22,22 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
     companion object{
         const val COLUMNS = 3
     }
-    val headerSize:Int
-        get() = list.indexOfFirst { it.isHeader.not() }.let {
-            if(it == -1){
-                if(list.lastOrNull()?.isHeader == true) list.size else 0
-            }else{
-                it
+    private var tmpHeaderSize = -1
+
+    private fun refreshHeaderSize(){
+        if(tmpHeaderSize == -1){
+            tmpHeaderSize = list.indexOfFirst { it.isHeader.not() }.let {
+                if(it == -1){
+                    if(list.lastOrNull()?.isHeader == true) list.size else 0
+                }else{
+                    it
+                }
             }
+        }
+    }
+    val headerSize:Int
+        get() = refreshHeaderSize().let {
+            tmpHeaderSize
         }
 
     private val list = mutableListOf<TestData>().apply {
@@ -56,10 +65,14 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
     }
     open class ItemViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
 
+        var isHeader = false
+            private set
         override fun bind(data: TestData) {
             super.bind(data)
+            isHeader = data.isHeader
             Log.d("ItemViewHolder", "bind: ${data.id}")
         }
+
     }
 
     class ItemFullViewHolder(binding: ItemHomeBinding) : ItemViewHolder(binding)
@@ -110,6 +123,9 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
                 this.isHeader = it
             }
         })
+        isHeader?.let {
+            tmpHeaderSize = -1
+        }
         Log.d("txlA", " itemMove: src:$srcPos dest:$destPos afterHeaderSize:$headerSize" )
         notifyItemMoved(srcPos, destPos)
 

@@ -4,8 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
-import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 
 /**
@@ -16,6 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
  */
 class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDecoration() {
     private val offset = 10
+
+    var showTopContainer = false
+    var showTopContainerRange:IntRange? = null
+
+
     override fun getItemOffsets(
         outRect: Rect,
         view: View,
@@ -23,7 +28,19 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
         state: RecyclerView.State
     ) {
         super.getItemOffsets(outRect, view, parent, state)
+        Log.d("tddsa", "invoke getItemOffsets")
         outRect.set(offset, offset, offset, offset)
+        val headerPos = if(showTopContainer) adapter.headerPos(parent) else null
+        val viewPos = parent.getChildViewHolder(view).bindingAdapterPosition
+        if(headerPos != null
+            && viewPos < adapter.headerSize
+            && viewPos >= headerPos.endStartPos
+            && headerPos.endStartPos < adapter.headerSize){
+            outRect.bottom = offset + 200
+
+            Log.d("tddsa", "pos:${parent.getChildViewHolder(view).bindingAdapterPosition} getItemOffsets: $outRect")
+        }
+
     }
 
 
@@ -35,34 +52,76 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
     }
     private val headerBgRect = Rect()
 
+    data class HeaderPos(
+        val startPos: Int,
+        val rightPos: Int,
+        val endStartPos: Int,
+    )
+
+    fun TestAdapter.headerPos(rv: RecyclerView): HeaderPos? {
+
+//        val childCount = rv.childCount
+//        if (childCount == 0) {
+//            return null
+//        }
+//        val child = rv.getChildAt(0)
+//        val firstUiPos = rv.getChildViewHolder(child).bindingAdapterPosition
+//        if(firstUiPos == RecyclerView.NO_POSITION){
+//            return null
+//        }
+        val firstUiPos = 0
+        val headerSize = headerSize - firstUiPos
+        if(headerSize <= 0){
+            return null
+        }
+//        val rightPos =
+//            firstUiPos + if (headerSize < TestAdapter.COLUMNS) headerSize - 1 else TestAdapter.COLUMNS - 1
+        val rightPos = headerSize - 1
+
+        val bottomStartPos =
+            firstUiPos + if (headerSize % TestAdapter.COLUMNS == 0) (headerSize / TestAdapter.COLUMNS - 1) * TestAdapter.COLUMNS else (headerSize / TestAdapter.COLUMNS) * TestAdapter.COLUMNS
+        return HeaderPos(firstUiPos, rightPos, bottomStartPos).also {
+            println("headerPos: $it")
+        }
+    }
+
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(canvas, parent, state)
-//        val layoutManager = parent.layoutManager ?: return
-//        val headerSize = adapter.headerSize
-//        val lastRowFirst = (headerSize / TestAdapter.COLUMNS - 1) * TestAdapter.COLUMNS
-//        if(headerSize > 0){
-//            headerBgRect.setEmpty()
-//            parent.forEach {
-////            layoutManager.viewh
-//                val childViewHolder = parent.getChildViewHolder(it)
-//                if(childViewHolder.bindingAdapterPosition == 0){
-//                    headerBgRect.left = it.left - offset
-//                    headerBgRect.top = it.top - offset
-//                }
-//                if(childViewHolder.bindingAdapterPosition == TestAdapter.COLUMNS - 1){
-//                    headerBgRect.right = it.right + offset
-//                }
-//                if(lastRowFirst == childViewHolder.bindingAdapterPosition){
-//                    headerBgRect.bottom = it.bottom + offset
-//                }
-//            }
-//
-//            if(headerBgRect.isEmpty){
-//                return
-//            }
-//            canvas.drawRect(headerBgRect, paint)
-
+//        if(showTopContainer.not()){
+        showTopContainerRange = null
 //        }
+        val headerPos = adapter.headerPos(parent) ?: return
+        headerBgRect.setEmpty()
+        val childCount = parent.childCount
+        for (index in 0 until childCount) {
+            val child = parent.getChildAt(index)
+            val childViewHolder = parent.getChildViewHolder(child)
+            if (index == 0 && childViewHolder.bindingAdapterPosition < adapter.headerSize) {
+                headerBgRect.left = child.left - offset
+                headerBgRect.top = child.top - offset
+            }
+            if (childViewHolder.bindingAdapterPosition == headerPos.rightPos) {
+                headerBgRect.right = child.right + offset
+            }
+            if (childViewHolder.bindingAdapterPosition == headerPos.endStartPos) {
+                headerBgRect.bottom = child.bottom + offset
+//                if(showTopContainer.not()){
+                showTopContainerRange = IntRange(child.top, child.bottom - child.height / 2)
+//                }
+                Log.d("tddsa", "bottom:" + child.bottom)
+            }
+            if (headerBgRect.bottom != 0 && headerBgRect.right != 0) {
+                break
+            }
+        }
+
+
+        if (headerBgRect.isEmpty) {
+            return
+        }
+//        Log.d("tddsa", "showTopContainerY:$showTopContainerY")
+
+        canvas.drawRect(headerBgRect, paint)
 
 
     }
