@@ -1,6 +1,9 @@
 package com.location.rvdrag
 
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -13,27 +16,34 @@ import com.location.rvdrag.databinding.ItemHomeBinding
  * time：2024/5/10 17:24
  * description：
  */
+const val USE_PAYLOAD = false
 class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Adapter<TestAdapter.TestViewHolder>() {
 
     companion object{
         const val COLUMNS = 3
     }
-    var headerSize = 0
-        private set
+    val headerSize:Int
+        get() = list.indexOfFirst { it.isHeader.not() }.let {
+            if(it == -1){
+                if(list.lastOrNull()?.isHeader == true) list.size else 0
+            }else{
+                it
+            }
+        }
 
     private val list = mutableListOf<TestData>().apply {
         addAll(header)
-        if(header.size % COLUMNS != 0){
+        if(USE_PAYLOAD && header.size % COLUMNS != 0){
             repeat(COLUMNS - header.size % COLUMNS){
                 add(TestData(-1, DataType.Payload))
             }
         }
-        headerSize = size
         addAll(uiList)
     }
 
-    abstract class TestViewHolder(protected val binding:ItemHomeBinding): RecyclerView.ViewHolder(binding.root){
+    abstract class TestViewHolder(val binding:ItemHomeBinding): RecyclerView.ViewHolder(binding.root){
         open fun bind(data:TestData){
+            binding.root.isVisible = true
             binding.textView.text = data.id.toString()
         }
     }
@@ -44,7 +54,15 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
             binding.textView.setBackgroundColor(Color.GRAY)
         }
     }
-    class ItemViewHolder(binding: ItemHomeBinding): TestViewHolder(binding)
+    open class ItemViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
+
+        override fun bind(data: TestData) {
+            super.bind(data)
+            Log.d("ItemViewHolder", "bind: ${data.id}")
+        }
+    }
+
+    class ItemFullViewHolder(binding: ItemHomeBinding) : ItemViewHolder(binding)
 
     class PayloadViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
         override fun bind(data: TestData) {
@@ -54,8 +72,8 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TestViewHolder {
         return when(viewType){
-            DataType.Top.type -> TopViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             DataType.Payload.type -> PayloadViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+            DataType.Item_Full.type -> ItemFullViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             else -> ItemViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
         }
 
@@ -65,6 +83,12 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
     override fun getItemCount(): Int = list.size
 
     override fun getItemViewType(position: Int): Int {
+//        if(USE_PAYLOAD.not()
+//            && position == headerSize - 1
+//            && headerSize % COLUMNS != 0
+//            ){
+//                return DataType.Item_Full.type
+//            }
         return list[position].type.type
     }
 
@@ -73,35 +97,88 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
     }
 
     fun itemMove(srcPos: Int, destPos: Int): Boolean {
-        list.add(destPos, list.removeAt(srcPos))
+        Log.d("txlA", " headerSize:$headerSize" )
+        val isHeader =  if(srcPos >= headerSize && destPos < headerSize){
+             true
+        }else if(srcPos < headerSize && destPos >= headerSize){
+            false
+        }else{
+            null
+        }
+        list.add(destPos, list.removeAt(srcPos).apply {
+            isHeader?.let {
+                this.isHeader = it
+            }
+        })
+        Log.d("txlA", " itemMove: src:$srcPos dest:$destPos afterHeaderSize:$headerSize" )
         notifyItemMoved(srcPos, destPos)
+
         return true
     }
 
-    fun addHeader(itemPos: Int): Boolean {
+    fun addHeader(itemPos: Int, recyclerView: RecyclerView): Boolean {
+        if(USE_PAYLOAD.not()){
+            return false
+        }
         val testData = list[itemPos]
         val payloadIndex = list.indexOfFirst { it.type == DataType.Payload }
         if(payloadIndex == -1){
             return false
         }
-        list[payloadIndex] = testData.copy(type = DataType.Top)
-        headerSize++
+        list[payloadIndex] = testData.copy(type = DataType.Item)
 //        notifyItemMoved(itemPos, payloadIndex)
         list.removeAt(itemPos)
-//        notifyItemChanged(payloadIndex)
-//        notifyItemRemoved(itemPos)
+//
 //        notifyItemRemoved(payloadIndex)
 //        notifyItemRemoved(itemPos)
 //        notifyItemInserted(payloadIndex)
 //        notifyItemMoved(itemPos, payloadIndex)
 //        notifyItemRemoved(itemPos)
 //        notifyItemChanged(payloadIndex)
-        notifyDataSetChanged()
+//        notifyDataSetChanged()
+        registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver(){
+
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+                super.onItemRangeChanged(positionStart, itemCount)
+                Handler(Looper.getMainLooper()).postDelayed( {
+                    Log.d("ItemViewHolder", "trigger")
+
+//                    recyclerView.findViewHolderForAdapterPosition(itemPos)?.itemView?.isVisible = false
+                    recyclerView.findViewHolderForAdapterPosition(itemPos)?.itemView?.let {
+                        it.isVisible = false
+                        it.translationX = 0f
+                        it.translationY = 0f
+                    }
+                    notifyItemRemoved(itemPos)
+
+
+                },250)
+
+
+                unregisterAdapterDataObserver(this)
+            }
+
+
+        })
+        Log.d("ItemViewHolder", "addHeader: $itemPos $payloadIndex")
+        notifyItemChanged(payloadIndex)
+
         return true
     }
 
     private inline fun findIndex(predicate: (TestData) -> Boolean): Int{
         return list.indexOfFirst(predicate)
+    }
+
+    fun findNextPayloadPos():Int? = list.indexOfFirst { it.type == DataType.Payload }.let {
+        if(it == -1) null else it
+    }
+
+    fun appendHeader() {
+//        list.add( 0, TestData(-1, DataType.Top))
+//        notifyDataSetChanged()
+//        notifyItemRangeInserted(1, 1)
     }
 }
 
@@ -109,9 +186,7 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
 
 sealed interface DataType{
     val type:Int
-    data object Top : DataType{
-        override val type: Int = 0
-    }
+
     data object Item : DataType{
         override val type: Int = 1
     }
@@ -119,6 +194,9 @@ sealed interface DataType{
     data object Payload: DataType{
         override val type: Int = 2
     }
+    data object Item_Full: DataType{
+        override val type: Int = 3
+    }
 
 }
-data class TestData(val id:Int, val type:DataType = DataType.Item)
+data class TestData(val id:Int, val type:DataType = DataType.Item, var isHeader:Boolean = false)

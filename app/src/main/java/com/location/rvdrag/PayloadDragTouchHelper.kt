@@ -1,6 +1,5 @@
 package com.location.rvdrag
 
-import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -15,7 +14,7 @@ import androidx.recyclerview.widget.TestItemTouchHelper
  * time：2024/5/10 18:51
  * description：
  */
-class DragTouchHelper(
+class PayloadDragTouchHelper(
     private val adapter: TestAdapter,
     private val gridLayoutManager: GridLayoutManager
     ): TestItemTouchHelper.Callback() {
@@ -32,6 +31,7 @@ class DragTouchHelper(
         return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0)
     }
 
+    private var payloadHolder: TestAdapter.PayloadViewHolder? = null
 
 
     override fun onMove(
@@ -39,46 +39,27 @@ class DragTouchHelper(
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-//        if(true){
-//            return false
-//        }
         if(viewHolder.bindingAdapterPosition < 0 || target.bindingAdapterPosition < 0){
             return false
         }
-        if(gridLayoutManager.spanSizeLookup.getSpanSize(target.bindingAdapterPosition) != 1){
-//            if(target is TestAdapter.ItemViewHolder){
-//                val selectRect = Rect()
-//                viewHolder.itemView.getDrawingRect(selectRect)
-//                val targetRect = Rect()
-//                target.binding.textView.getDrawingRect(targetRect)
-//                if(target){
-//
-//                    return false
-//                }
-//            }
-//            return false
 
+        if(USE_PAYLOAD){
+            payloadHolder = target as? TestAdapter.PayloadViewHolder
+            if(target is TestAdapter.PayloadViewHolder){
+                return true
+            }
         }
-
-
-
 //        (recyclerView.layoutManager as? TestGridLayoutManager)?.d = false
 
         return adapter.itemMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
     }
 
 
-    override fun onMoved(
-        recyclerView: RecyclerView,
-        viewHolder: RecyclerView.ViewHolder,
-        fromPos: Int,
-        target: RecyclerView.ViewHolder,
-        toPos: Int,
-        x: Int,
-        y: Int
-    ) {
-        super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y)
-    }
+
+
+
+
+
 
 
     override fun isLongPressDragEnabled(): Boolean {
@@ -90,7 +71,18 @@ class DragTouchHelper(
     }
 
 
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        if(USE_PAYLOAD){
+            payloadHolder?.let {
+                adapter.addHeader(viewHolder.bindingAdapterPosition, recyclerView)
+                payloadHolder = null
+            }
+        }
 
+
+
+    }
 
 
 
@@ -104,6 +96,32 @@ class DragTouchHelper(
         }
     }
 
+
+
+
+    override fun applyTargetTranslate(
+        recyclerView: RecyclerView,
+        prevSelected: RecyclerView.ViewHolder,
+        targetTranslateX: Float,
+        targetTranslateY: Float
+    ): FloatArray {
+        if(USE_PAYLOAD && payloadHolder != null){
+           val nextPayloadHolderPos =  adapter.findNextPayloadPos()
+            if (nextPayloadHolderPos != null) {
+                val payloadViewHolder = recyclerView.findViewHolderForAdapterPosition(nextPayloadHolderPos)
+                if(payloadViewHolder?.itemView != null){
+                    val top = payloadViewHolder.itemView.top.toFloat()
+                    val left = payloadViewHolder.itemView.left.toFloat()
+
+                    return floatArrayOf(left - prevSelected.itemView.left, top - prevSelected.itemView.top).also {
+                        Log.d(TAG, "applyTargetTranslate: ${it.joinToString()}")
+                    }
+                }
+            }
+        }
+        return super.applyTargetTranslate(recyclerView, prevSelected, targetTranslateX, targetTranslateY)
+    }
+
     override fun chooseDropTarget(
         selected: RecyclerView.ViewHolder,
         dropTargets: MutableList<RecyclerView.ViewHolder>,
@@ -112,31 +130,4 @@ class DragTouchHelper(
     ): RecyclerView.ViewHolder? {
         return super.chooseDropTarget(selected, dropTargets, curX, curY)
     }
-
-
-    override fun getTargetRect(viewHolder: RecyclerView.ViewHolder, outRect: Rect):Boolean {
-        if(
-            viewHolder is TestAdapter.ItemViewHolder
-            &&
-            gridLayoutManager.spanSizeLookup.getSpanSize(viewHolder.bindingAdapterPosition) != 1){
-            //有占位
-            val container = viewHolder.binding.textView
-            outRect.set(
-                viewHolder.itemView.left + container.left,
-                   viewHolder.itemView.top + container.top,
-                viewHolder.itemView.left + container.right,
-                viewHolder.itemView.top + container.bottom
-            )
-            return true
-        }else{
-           return super.getTargetRect(viewHolder, outRect)
-        }
-    }
-
-
-
-
-
-
-
 }

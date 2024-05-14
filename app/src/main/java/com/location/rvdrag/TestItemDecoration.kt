@@ -37,27 +37,32 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
 
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(canvas, parent, state)
-        val layoutManager = parent.layoutManager ?: return
-        val headerSize = adapter.headerSize
-        val lastRowFirst = (headerSize / TestAdapter.COLUMNS - 1) * TestAdapter.COLUMNS
-        if(headerSize > 0){
-            parent.forEach {
-//            layoutManager.viewh
-                val childViewHolder = parent.getChildViewHolder(it)
-                if(childViewHolder.bindingAdapterPosition == 0){
-                    headerBgRect.left = it.left - offset
-                    headerBgRect.top = it.top - offset
-                }
-                if(childViewHolder.bindingAdapterPosition == TestAdapter.COLUMNS - 1){
-                    headerBgRect.right = it.right + offset
-                }
-                if(lastRowFirst == childViewHolder.bindingAdapterPosition){
-                    headerBgRect.bottom = it.bottom + offset
-                }
-            }
-            canvas.drawRect(headerBgRect, paint)
+//        val layoutManager = parent.layoutManager ?: return
+//        val headerSize = adapter.headerSize
+//        val lastRowFirst = (headerSize / TestAdapter.COLUMNS - 1) * TestAdapter.COLUMNS
+//        if(headerSize > 0){
+//            headerBgRect.setEmpty()
+//            parent.forEach {
+////            layoutManager.viewh
+//                val childViewHolder = parent.getChildViewHolder(it)
+//                if(childViewHolder.bindingAdapterPosition == 0){
+//                    headerBgRect.left = it.left - offset
+//                    headerBgRect.top = it.top - offset
+//                }
+//                if(childViewHolder.bindingAdapterPosition == TestAdapter.COLUMNS - 1){
+//                    headerBgRect.right = it.right + offset
+//                }
+//                if(lastRowFirst == childViewHolder.bindingAdapterPosition){
+//                    headerBgRect.bottom = it.bottom + offset
+//                }
+//            }
+//
+//            if(headerBgRect.isEmpty){
+//                return
+//            }
+//            canvas.drawRect(headerBgRect, paint)
 
-        }
+//        }
 
 
     }

@@ -6,11 +6,9 @@
 	<TextView
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
 		android:id="@+id/textView"
 		android:background="#3F51B5"
-		android:gravity="center"
-		android:layout_width="0dp"
+		android:layout_width="340px"
 		android:textColor="#E91E63"
 		app:layout_constraintDimensionRatio="1:1"
 		android:layout_height="0dp"/>
