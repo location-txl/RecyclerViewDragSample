@@ -113,6 +113,8 @@ class DragTouchHelper(
             selectedViewHolder?.let {
                 if(addSelectToHeader){
                     adapter.addSelectToHeader(it)
+                }else if(itemDecoration.showTopContainer){
+                    adapter.addSelectToHeader(it)
                 }
             }
 
@@ -126,25 +128,40 @@ class DragTouchHelper(
     private var addSelectToHeader = false
 //    private val addHeadCheckDiff = 50
 
+    override fun onSelectMove(select: ViewHolder, curX: Int, curY: Int) {
+        val showTopContainerRange = itemDecoration.showTopContainerRange
+        val ifTopContainerIsShowRange = itemDecoration.ifTopContainerIsShowRange
+        Log.d("txlkl", "curY: $curY  ifTopContainerIsShowRange:$ifTopContainerIsShowRange")
+        if(showTopContainerRange != null
+            &&
+            ifTopContainerIsShowRange != null
+            &&
+            select.bindingAdapterPosition >= adapter.headerSize
+            && adapter.headerSize % TestAdapter.COLUMNS == 0){
+            val isShowContainer = if(!itemDecoration.showTopContainer){
+                showTopContainerRange.contains(curY)
+            }else{
+                ifTopContainerIsShowRange.contains(curY)
+            }
+            if(isShowContainer && itemDecoration.showTopContainer.not()) {
+                itemDecoration.showTopContainer = true
+                recyclerView.invalidateItemDecorations()
+            }else if(isShowContainer.not()
+                && itemDecoration.showTopContainer
+            ){
+                itemDecoration.showTopContainer = false
+                recyclerView.invalidateItemDecorations()
+            }
+        }
+    }
+
     override fun chooseDropTarget(
         selected: RecyclerView.ViewHolder,
         dropTargets: MutableList<RecyclerView.ViewHolder>,
         curX: Int,
         curY: Int
     ): RecyclerView.ViewHolder? {
-        if(selected.bindingAdapterPosition >= adapter.headerSize
-            && adapter.headerSize % TestAdapter.COLUMNS == 0){
-            val isShowContainer =  itemDecoration.showTopContainerRange?.contains(curY) == true
-            if(isShowContainer && itemDecoration.showTopContainer.not()) {
-                itemDecoration.showTopContainer = true
-                recyclerView.invalidateItemDecorations()
-            }else if(isShowContainer.not()
-                && itemDecoration.showTopContainer
-               ){
-                itemDecoration.showTopContainer = false
-                recyclerView.invalidateItemDecorations()
-            }
-        }
+
 
         val chooseDropTarget = super.chooseDropTarget(selected, dropTargets, curX, curY)
         addSelectToHeader = false
@@ -169,7 +186,7 @@ class DragTouchHelper(
             val headLastTop = headLastHolder.itemView.top + container.top
             val headLastRight = headLastLeft + (headLastHolder.itemView.width - container.width)
             val headLastBottom = headLastHolder.itemView.top + container.bottom
-            Log.d("txlddd", " select left:$left headLastLeft:$headLastLeft selectRight:$right headLastRight:$headLastRight")
+//            Log.d("txlddd", " select left:$left headLastLeft:$headLastLeft selectRight:$right headLastRight:$headLastRight")
             if(
 //                left >= headLastLeft && right <= headLastRight
                 (
@@ -246,7 +263,9 @@ class DragTouchHelper(
         animateDx: Float,
         animateDy: Float
     ): Long {
-        if(addSelectToHeader && animationType == ItemTouchHelper.ANIMATION_TYPE_DRAG){
+        if((addSelectToHeader
+                    || itemDecoration.showTopContainer
+                ) && animationType == ItemTouchHelper.ANIMATION_TYPE_DRAG){
             return 0
         }
         return super.getAnimationDuration(recyclerView, animationType, animateDx, animateDy)

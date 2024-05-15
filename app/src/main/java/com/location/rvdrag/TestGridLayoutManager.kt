@@ -19,7 +19,6 @@ class TestGridLayoutManager(context: Context?, spanCount: Int, private val adapt
                     return if (position == adapter.headerSize - 1
                         && adapter.headerSize % spanCount != 0) {
                         spanCount - (adapter.headerSize % spanCount) + 1
-//                        1
                     } else {
                         1
                     }

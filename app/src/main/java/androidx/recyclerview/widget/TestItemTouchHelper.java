@@ -876,6 +876,7 @@ public class TestItemTouchHelper extends RecyclerView.ItemDecoration
         final float threshold = mCallback.getMoveThreshold(viewHolder);
         final int x = (int) (mSelectedStartX + mDx);
         final int y = (int) (mSelectedStartY + mDy);
+        mCallback.onSelectMove(viewHolder, x, y);
         if (Math.abs(y - viewHolder.itemView.getTop()) < viewHolder.itemView.getHeight() * threshold
                 && Math.abs(x - viewHolder.itemView.getLeft())
                 < viewHolder.itemView.getWidth() * threshold) {
@@ -2252,6 +2253,10 @@ public class TestItemTouchHelper extends RecyclerView.ItemDecoration
 
         public float[] applyTargetTranslate(RecyclerView recyclerView, ViewHolder prevSelected, float targetTranslateX, float targetTranslateY) {
             return new float[]{targetTranslateX, targetTranslateY};
+        }
+
+        public void onSelectMove(ViewHolder select, int curX, int curY) {
+
         }
     }
 

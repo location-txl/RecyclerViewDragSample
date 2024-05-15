@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
             TestData(-96, DataType.Item, true),
             TestData(-95, DataType.Item, true),
             TestData(-94, DataType.Item, true),
+            TestData(-93, DataType.Item, true),
+            TestData(-92, DataType.Item, true),
 //            TestData(-99, DataType.Top),
         ),
         uiList = (20..100).map { TestData(it) }

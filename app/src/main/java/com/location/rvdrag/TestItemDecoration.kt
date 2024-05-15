@@ -22,10 +22,11 @@ import kotlin.math.max
 class TestItemDecoration(private val adapter: TestAdapter, private val context: Context) :
     RecyclerView.ItemDecoration() {
     private val offset = 10
-    private val payloadOffset = 200
+    private val payloadOffset = 360
 
     var showTopContainer = false
     var showTopContainerRange: IntRange? = null
+    var ifTopContainerIsShowRange: IntRange? = null
     val bg by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.a) }
 
 
@@ -106,6 +107,7 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
         super.onDraw(canvas, parent, state)
 //        if(showTopContainer.not()){
         showTopContainerRange = null
+        ifTopContainerIsShowRange = null
 //        }
         bitmapSrc.set(0, 0, bg.width, bg.height)
 
@@ -148,7 +150,8 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
                     child.bottom + offset + if (showTopContainer) payloadOffset else 0
 
 //                if(showTopContainer.not()){
-                showTopContainerRange = IntRange(child.top, child.bottom - child.height / 2)
+                showTopContainerRange = IntRange(child.top, child.bottom - child.height / 4)
+                ifTopContainerIsShowRange = IntRange(showTopContainerRange!!.first, child.bottom + payloadOffset + offset)
 //                }
                 Log.d("tddsa", "bottom:" + child.bottom)
             }
