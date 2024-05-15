@@ -16,11 +16,16 @@ class MainActivity : AppCompatActivity() {
         header = listOf(
             TestData(-100, DataType.Item, true),
             TestData(-99, DataType.Item, true),
+            TestData(-98, DataType.Item, true),
+            TestData(-97, DataType.Item, true),
+            TestData(-96, DataType.Item, true),
+            TestData(-95, DataType.Item, true),
+            TestData(-94, DataType.Item, true),
 //            TestData(-99, DataType.Top),
         ),
         uiList = (20..100).map { TestData(it) }
     ) }
-    private val itemDecoration by lazy {             TestItemDecoration(testAdapter)
+    private val itemDecoration by lazy {             TestItemDecoration(testAdapter, this)
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

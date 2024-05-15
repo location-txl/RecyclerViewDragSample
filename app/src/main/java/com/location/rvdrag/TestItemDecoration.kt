@@ -1,12 +1,17 @@
 package com.location.rvdrag
 
+import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.math.abs
+import kotlin.math.max
 
 /**
  *
@@ -14,11 +19,12 @@ import androidx.recyclerview.widget.RecyclerView
  * time：2024/5/10 19:05
  * description：
  */
-class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDecoration() {
-    private val offset = 10
+class TestItemDecoration(private val adapter: TestAdapter, private val context: Context): RecyclerView.ItemDecoration() {
+    private val offset = 100
 
     var showTopContainer = false
     var showTopContainerRange:IntRange? = null
+    val bg by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.a) }
 
 
     override fun getItemOffsets(
@@ -85,12 +91,16 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
         }
     }
 
+    private val bitmapSrc = Rect()
+//    private var
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(canvas, parent, state)
 //        if(showTopContainer.not()){
         showTopContainerRange = null
 //        }
-        val headerPos = adapter.headerPos(parent) ?: return
+    bitmapSrc.set(0, 0, bg.width, bg.height)
+
+    val headerPos = adapter.headerPos(parent) ?: return
         headerBgRect.setEmpty()
         val childCount = parent.childCount
         for (index in 0 until childCount) {
@@ -98,7 +108,23 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
             val childViewHolder = parent.getChildViewHolder(child)
             if (index == 0 && childViewHolder.bindingAdapterPosition < adapter.headerSize) {
                 headerBgRect.left = child.left - offset
-                headerBgRect.top = child.top - offset
+
+                if(childViewHolder.bindingAdapterPosition != 0 ){
+//                    bitmapSrc.top = parent.computeVerticalScrollOffset()
+//                    headerBgRect.top = -(childViewHolder.itemView.height + offset  + abs(child.top) )
+                    val a = (childViewHolder.bindingAdapterPosition / TestAdapter.COLUMNS)
+                    headerBgRect.top = -( (childViewHolder.itemView.height + offset * 2) * a +
+                            if (child.top > 0) offset - child.top else offset + abs(child.top)
+                            )
+
+
+                        Log.d("fgdwq", " headerBgRect.top:${headerBgRect.top}  rvoffse:${parent.computeVerticalScrollOffset()}"  )
+
+
+                }else{
+                    headerBgRect.top = child.top - offset
+                }
+//
             }
             if (childViewHolder.bindingAdapterPosition == headerPos.rightPos) {
                 headerBgRect.right = child.right + offset
@@ -121,8 +147,11 @@ class TestItemDecoration(private val adapter: TestAdapter): RecyclerView.ItemDec
         }
 //        Log.d("tddsa", "showTopContainerY:$showTopContainerY")
 
-        canvas.drawRect(headerBgRect, paint)
-
-
+//        canvas.drawRect(headerBgRect, paint)
+//        headerBgRect.top = 0
+//        Log.d("abcdsa", "headerBgRect:$headerBgRect")
+//    headerBgRect.top = 0
+//        bitmapSrc.set(0, -parent.computeVerticalScrollOffset(), bg.width, headerBgRect.height())
+        canvas.drawBitmap(bg, bitmapSrc, headerBgRect, paint)
     }
 }
