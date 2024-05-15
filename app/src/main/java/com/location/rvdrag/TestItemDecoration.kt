@@ -20,7 +20,8 @@ import kotlin.math.max
  * description：
  */
 class TestItemDecoration(private val adapter: TestAdapter, private val context: Context): RecyclerView.ItemDecoration() {
-    private val offset = 100
+    private val offset = 10
+    private val payloadOffset = 200
 
     var showTopContainer = false
     var showTopContainerRange:IntRange? = null
@@ -42,7 +43,7 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
             && viewPos < adapter.headerSize
             && viewPos >= headerPos.endStartPos
             && headerPos.endStartPos < adapter.headerSize){
-            outRect.bottom = offset + 200
+            outRect.bottom = offset + payloadOffset
 
             Log.d("tddsa", "pos:${parent.getChildViewHolder(view).bindingAdapterPosition} getItemOffsets: $outRect")
         }
@@ -130,7 +131,8 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
                 headerBgRect.right = child.right + offset
             }
             if (childViewHolder.bindingAdapterPosition == headerPos.endStartPos) {
-                headerBgRect.bottom = child.bottom + offset
+                headerBgRect.bottom = child.bottom + offset + if(showTopContainer) payloadOffset else 0
+
 //                if(showTopContainer.not()){
                 showTopContainerRange = IntRange(child.top, child.bottom - child.height / 2)
 //                }
