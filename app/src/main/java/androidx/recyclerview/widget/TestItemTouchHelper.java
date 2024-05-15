@@ -1856,21 +1856,26 @@ public class TestItemTouchHelper extends RecyclerView.ItemDecoration
                     if (diff < 0 && targetRect.right > selected.itemView.getRight()) {
                         final int score = Math.abs(diff);
                         if (score > winnerScore) {
-                            Log.d("txlA", "targetRect.right:" + targetRect.right + "  right:" + right);
-                            Log.d("txlA", " selected.itemView.getRight():" + selected.itemView.getRight());
-                            Log.d("txlA", " dx > 0 diff:" + diff);
+                            if(DEBUG){
+                                Log.d("txlA", "targetRect.right:" + targetRect.right + "  right:" + right);
+                                Log.d("txlA", " selected.itemView.getRight():" + selected.itemView.getRight());
+                                Log.d("txlA", " dx > 0 diff:" + diff);
+                            }
+
 
                             winnerScore = score;
                             winner = target;
                         }
                     }
                 }
-                if (dx < 0) {//TODO
+                if (dx < 0) {
                     int diff = targetRect.left - curX;
                     if (diff > 0 && targetRect.left < selected.itemView.getLeft()) {
                         final int score = Math.abs(diff);
                         if (score > winnerScore) {
-                            Log.d("txlA", " dx < 0");
+                            if(DEBUG){
+                                Log.d("txlA", " dx < 0");
+                            }
 
                             winnerScore = score;
                             winner = target;

@@ -19,12 +19,13 @@ import kotlin.math.max
  * time：2024/5/10 19:05
  * description：
  */
-class TestItemDecoration(private val adapter: TestAdapter, private val context: Context): RecyclerView.ItemDecoration() {
+class TestItemDecoration(private val adapter: TestAdapter, private val context: Context) :
+    RecyclerView.ItemDecoration() {
     private val offset = 10
     private val payloadOffset = 200
 
     var showTopContainer = false
-    var showTopContainerRange:IntRange? = null
+    var showTopContainerRange: IntRange? = null
     val bg by lazy { BitmapFactory.decodeResource(context.resources, R.drawable.a) }
 
 
@@ -37,15 +38,19 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
         super.getItemOffsets(outRect, view, parent, state)
         Log.d("tddsa", "invoke getItemOffsets")
         outRect.set(offset, offset, offset, offset)
-        val headerPos = if(showTopContainer) adapter.headerPos(parent) else null
+        val headerPos = if (showTopContainer) adapter.headerPos(parent) else null
         val viewPos = parent.getChildViewHolder(view).bindingAdapterPosition
-        if(headerPos != null
+        if (headerPos != null
             && viewPos < adapter.headerSize
             && viewPos >= headerPos.endStartPos
-            && headerPos.endStartPos < adapter.headerSize){
+            && headerPos.endStartPos < adapter.headerSize
+        ) {
             outRect.bottom = offset + payloadOffset
 
-            Log.d("tddsa", "pos:${parent.getChildViewHolder(view).bindingAdapterPosition} getItemOffsets: $outRect")
+            Log.d(
+                "tddsa",
+                "pos:${parent.getChildViewHolder(view).bindingAdapterPosition} getItemOffsets: $outRect"
+            )
         }
 
     }
@@ -54,9 +59,11 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
     private val paint = Paint().apply {
         color = Color.RED
     }
+
     override fun onDrawOver(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(canvas, parent, state)
     }
+
     private val headerBgRect = Rect()
 
     data class HeaderPos(
@@ -78,7 +85,7 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
 //        }
         val firstUiPos = 0
         val headerSize = headerSize - firstUiPos
-        if(headerSize <= 0){
+        if (headerSize <= 0) {
             return null
         }
 //        val rightPos =
@@ -93,15 +100,16 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
     }
 
     private val bitmapSrc = Rect()
-//    private var
+
+    //    private var
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(canvas, parent, state)
 //        if(showTopContainer.not()){
         showTopContainerRange = null
 //        }
-    bitmapSrc.set(0, 0, bg.width, bg.height)
+        bitmapSrc.set(0, 0, bg.width, bg.height)
 
-    val headerPos = adapter.headerPos(parent) ?: return
+        val headerPos = adapter.headerPos(parent) ?: return
         headerBgRect.setEmpty()
         val childCount = parent.childCount
         for (index in 0 until childCount) {
@@ -110,19 +118,24 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
             if (index == 0 && childViewHolder.bindingAdapterPosition < adapter.headerSize) {
                 headerBgRect.left = child.left - offset
 
-                if(childViewHolder.bindingAdapterPosition != 0 ){
+                if (childViewHolder.bindingAdapterPosition != 0) {
 //                    bitmapSrc.top = parent.computeVerticalScrollOffset()
 //                    headerBgRect.top = -(childViewHolder.itemView.height + offset  + abs(child.top) )
                     val a = (childViewHolder.bindingAdapterPosition / TestAdapter.COLUMNS)
-                    headerBgRect.top = -( (childViewHolder.itemView.height + offset * 2) * a +
-                            if (child.top > 0) offset - child.top else offset + abs(child.top)
-                            )
+                    headerBgRect.top =
+                        -((childViewHolder.itemView.height + offset * 2) * a + if (child.top > 0) offset - child.top else offset + abs(
+                            child.top
+                        )
+                                )
 
 
-                        Log.d("fgdwq", " headerBgRect.top:${headerBgRect.top}  rvoffse:${parent.computeVerticalScrollOffset()}"  )
+                    Log.d(
+                        "fgdwq",
+                        " headerBgRect.top:${headerBgRect.top}  rvoffse:${parent.computeVerticalScrollOffset()}"
+                    )
 
 
-                }else{
+                } else {
                     headerBgRect.top = child.top - offset
                 }
 //
@@ -131,7 +144,8 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
                 headerBgRect.right = child.right + offset
             }
             if (childViewHolder.bindingAdapterPosition == headerPos.endStartPos) {
-                headerBgRect.bottom = child.bottom + offset + if(showTopContainer) payloadOffset else 0
+                headerBgRect.bottom =
+                    child.bottom + offset + if (showTopContainer) payloadOffset else 0
 
 //                if(showTopContainer.not()){
                 showTopContainerRange = IntRange(child.top, child.bottom - child.height / 2)

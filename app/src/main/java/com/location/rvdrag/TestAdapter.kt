@@ -109,9 +109,11 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
         holder.bind(list[position])
     }
 
-    fun itemMove(srcPos: Int, destPos: Int): Boolean {
+    fun itemMove(srcPos: Int, destPos: Int, isAppendHeader:Boolean = false): Boolean {
+
         Log.d("txlA", " headerSize:$headerSize" )
-        val isHeader =  if(srcPos >= headerSize && destPos < headerSize){
+        val lastHeaderSize = if(isAppendHeader) headerSize + 1 else headerSize
+        val isHeader =  if(srcPos >= headerSize && destPos < lastHeaderSize){
              true
         }else if(srcPos < headerSize && destPos >= headerSize){
             false
@@ -195,6 +197,11 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
 //        list.add( 0, TestData(-1, DataType.Top))
 //        notifyDataSetChanged()
 //        notifyItemRangeInserted(1, 1)
+    }
+
+    fun addSelectToHeader(selectHolder: RecyclerView.ViewHolder) {
+        val selectPos = selectHolder.bindingAdapterPosition
+        itemMove(selectPos, headerSize, isAppendHeader = true)
     }
 }
 
