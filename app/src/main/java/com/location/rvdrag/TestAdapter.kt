@@ -4,12 +4,14 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.LogPrinter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.location.rvdrag.databinding.ItemHomeBinding
+import kotlin.math.round
 
 /**
  *
@@ -21,7 +23,9 @@ const val USE_PAYLOAD = false
 class TestAdapter(
     header:List<TestData>,
     uiList:List<TestData>,
-    private val longClickDrag:(holder:ViewHolder) -> Unit
+    private val longClickDrag:(holder:ViewHolder) -> Unit,
+    private val clickListener:(holder:ViewHolder) -> Unit
+
     ): RecyclerView.Adapter<TestAdapter.TestViewHolder>() {
 
     companion object{
@@ -57,12 +61,16 @@ class TestAdapter(
 
     abstract class TestViewHolder(
         val binding:ItemHomeBinding,
-        private val longClickDrag:(holder:ViewHolder) -> Unit
+        longClickDrag:(holder:ViewHolder) -> Unit,
+        clickListener:(holder:ViewHolder) -> Unit
         ): RecyclerView.ViewHolder(binding.root){
         init {
             binding.textView.setOnLongClickListener {
                 longClickDrag(this)
                 true
+            }
+            binding.textView.setOnClickListener {
+                clickListener(this)
             }
         }
         open fun bind(data:TestData){
@@ -72,7 +80,9 @@ class TestAdapter(
     }
 
 
-    open class ItemViewHolder(binding: ItemHomeBinding,longClickDrag:(holder:ViewHolder) -> Unit): TestViewHolder(binding, longClickDrag){
+    open class ItemViewHolder(binding: ItemHomeBinding,
+                              longClickDrag:(holder:ViewHolder) -> Unit,
+                              clickListener:(holder:ViewHolder) -> Unit): TestViewHolder(binding, longClickDrag, clickListener){
 
         var isHeader = false
             private set
@@ -87,7 +97,7 @@ class TestAdapter(
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TestViewHolder {
-        return ItemViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false), longClickDrag)
+        return ItemViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false), longClickDrag, clickListener)
 
 
     }

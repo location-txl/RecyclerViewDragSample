@@ -2,6 +2,7 @@ package com.location.rvdrag
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import androidx.recyclerview.widget.GridLayoutManager
@@ -28,6 +29,10 @@ class MainActivity : AppCompatActivity() {
         uiList = (20..100).map { TestData(it) },
         longClickDrag = {
             touchHelper?.startDrag(it)
+        },
+
+        clickListener = {
+            Toast.makeText(this, "click:${it.bindingAdapterPosition}", Toast.LENGTH_SHORT).show()
         }
     ) }
     private val itemDecoration by lazy {             TestItemDecoration(testAdapter, this)
