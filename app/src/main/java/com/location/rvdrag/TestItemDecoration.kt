@@ -166,11 +166,11 @@ class TestItemDecoration(private val adapter: TestAdapter, private val context: 
         }
 //        Log.d("tddsa", "showTopContainerY:$showTopContainerY")
 
-//        canvas.drawRect(headerBgRect, paint)
+        canvas.drawRect(headerBgRect, paint)
 //        headerBgRect.top = 0
 //        Log.d("abcdsa", "headerBgRect:$headerBgRect")
 //    headerBgRect.top = 0
 //        bitmapSrc.set(0, -parent.computeVerticalScrollOffset(), bg.width, headerBgRect.height())
-        canvas.drawBitmap(bg, bitmapSrc, headerBgRect, paint)
+//        canvas.drawBitmap(bg, bitmapSrc, headerBgRect, paint)
     }
 }

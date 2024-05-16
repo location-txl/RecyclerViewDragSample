@@ -1,6 +1,7 @@
 package com.location.rvdrag
 
 import android.content.Context
+import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 
 /**
@@ -26,5 +27,9 @@ class TestGridLayoutManager(context: Context?, spanCount: Int, private val adapt
             }
         }
 
+    }
+
+    override fun measureChild(child: View, widthUsed: Int, heightUsed: Int) {
+        super.measureChild(child, widthUsed, heightUsed)
     }
 }

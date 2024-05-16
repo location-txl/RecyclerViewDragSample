@@ -25,13 +25,13 @@ class PayloadDragTouchHelper(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        if(viewHolder is TestAdapter.PayloadViewHolder){
-            return makeMovementFlags(0, 0)
-        }
+//        if(viewHolder is TestAdapter.PayloadViewHolder){
+//            return makeMovementFlags(0, 0)
+//        }
         return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0)
     }
 
-    private var payloadHolder: TestAdapter.PayloadViewHolder? = null
+//    private var payloadHolder: TestAdapter.PayloadViewHolder? = null
 
 
     override fun onMove(
@@ -43,12 +43,12 @@ class PayloadDragTouchHelper(
             return false
         }
 
-        if(USE_PAYLOAD){
-            payloadHolder = target as? TestAdapter.PayloadViewHolder
-            if(target is TestAdapter.PayloadViewHolder){
-                return true
-            }
-        }
+//        if(USE_PAYLOAD){
+//            payloadHolder = target as? TestAdapter.PayloadViewHolder
+//            if(target is TestAdapter.PayloadViewHolder){
+//                return true
+//            }
+//        }
 //        (recyclerView.layoutManager as? TestGridLayoutManager)?.d = false
 
         return adapter.itemMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
@@ -73,12 +73,12 @@ class PayloadDragTouchHelper(
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        if(USE_PAYLOAD){
-            payloadHolder?.let {
-                adapter.addHeader(viewHolder.bindingAdapterPosition, recyclerView)
-                payloadHolder = null
-            }
-        }
+//        if(USE_PAYLOAD){
+//            payloadHolder?.let {
+//                adapter.addHeader(viewHolder.bindingAdapterPosition, recyclerView)
+//                payloadHolder = null
+//            }
+//        }
 
 
 
@@ -105,20 +105,20 @@ class PayloadDragTouchHelper(
         targetTranslateX: Float,
         targetTranslateY: Float
     ): FloatArray {
-        if(USE_PAYLOAD && payloadHolder != null){
-           val nextPayloadHolderPos =  adapter.findNextPayloadPos()
-            if (nextPayloadHolderPos != null) {
-                val payloadViewHolder = recyclerView.findViewHolderForAdapterPosition(nextPayloadHolderPos)
-                if(payloadViewHolder?.itemView != null){
-                    val top = payloadViewHolder.itemView.top.toFloat()
-                    val left = payloadViewHolder.itemView.left.toFloat()
-
-                    return floatArrayOf(left - prevSelected.itemView.left, top - prevSelected.itemView.top).also {
-                        Log.d(TAG, "applyTargetTranslate: ${it.joinToString()}")
-                    }
-                }
-            }
-        }
+//        if(USE_PAYLOAD && payloadHolder != null){
+//           val nextPayloadHolderPos =  adapter.findNextPayloadPos()
+//            if (nextPayloadHolderPos != null) {
+//                val payloadViewHolder = recyclerView.findViewHolderForAdapterPosition(nextPayloadHolderPos)
+//                if(payloadViewHolder?.itemView != null){
+//                    val top = payloadViewHolder.itemView.top.toFloat()
+//                    val left = payloadViewHolder.itemView.left.toFloat()
+//
+//                    return floatArrayOf(left - prevSelected.itemView.left, top - prevSelected.itemView.top).also {
+//                        Log.d(TAG, "applyTargetTranslate: ${it.joinToString()}")
+//                    }
+//                }
+//            }
+//        }
         return super.applyTargetTranslate(recyclerView, prevSelected, targetTranslateX, targetTranslateY)
     }
 

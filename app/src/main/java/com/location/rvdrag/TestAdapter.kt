@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.location.rvdrag.databinding.ItemHomeBinding
 
 /**
@@ -17,7 +18,11 @@ import com.location.rvdrag.databinding.ItemHomeBinding
  * description：
  */
 const val USE_PAYLOAD = false
-class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Adapter<TestAdapter.TestViewHolder>() {
+class TestAdapter(
+    header:List<TestData>,
+    uiList:List<TestData>,
+    private val longClickDrag:(holder:ViewHolder) -> Unit
+    ): RecyclerView.Adapter<TestAdapter.TestViewHolder>() {
 
     companion object{
         const val COLUMNS = 3
@@ -50,20 +55,24 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
         addAll(uiList)
     }
 
-    abstract class TestViewHolder(val binding:ItemHomeBinding): RecyclerView.ViewHolder(binding.root){
+    abstract class TestViewHolder(
+        val binding:ItemHomeBinding,
+        private val longClickDrag:(holder:ViewHolder) -> Unit
+        ): RecyclerView.ViewHolder(binding.root){
+        init {
+            binding.textView.setOnLongClickListener {
+                longClickDrag(this)
+                true
+            }
+        }
         open fun bind(data:TestData){
             binding.root.isVisible = true
             binding.textView.text = data.id.toString()
         }
     }
 
-    class TopViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
-        override fun bind(data: TestData) {
-            super.bind(data)
-            binding.textView.setBackgroundColor(Color.GRAY)
-        }
-    }
-    open class ItemViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
+
+    open class ItemViewHolder(binding: ItemHomeBinding,longClickDrag:(holder:ViewHolder) -> Unit): TestViewHolder(binding, longClickDrag){
 
         var isHeader = false
             private set
@@ -75,20 +84,10 @@ class TestAdapter(header:List<TestData>, uiList:List<TestData>): RecyclerView.Ad
 
     }
 
-    class ItemFullViewHolder(binding: ItemHomeBinding) : ItemViewHolder(binding)
 
-    class PayloadViewHolder(binding: ItemHomeBinding): TestViewHolder(binding){
-        override fun bind(data: TestData) {
-            binding.textView.isVisible = false
-        }
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TestViewHolder {
-        return when(viewType){
-            DataType.Payload.type -> PayloadViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-            DataType.Item_Full.type -> ItemFullViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-            else -> ItemViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        }
+        return ItemViewHolder(ItemHomeBinding.inflate(LayoutInflater.from(parent.context), parent, false), longClickDrag)
 
 
     }

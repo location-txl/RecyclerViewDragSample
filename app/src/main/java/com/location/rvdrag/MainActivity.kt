@@ -18,17 +18,21 @@ class MainActivity : AppCompatActivity() {
             TestData(-99, DataType.Item, true),
             TestData(-98, DataType.Item, true),
             TestData(-97, DataType.Item, true),
-            TestData(-96, DataType.Item, true),
-            TestData(-95, DataType.Item, true),
-            TestData(-94, DataType.Item, true),
-            TestData(-93, DataType.Item, true),
-            TestData(-92, DataType.Item, true),
+//            TestData(-96, DataType.Item, true),
+//            TestData(-95, DataType.Item, true),
+//            TestData(-94, DataType.Item, true),
+//            TestData(-93, DataType.Item, true),
+//            TestData(-92, DataType.Item, true),
 //            TestData(-99, DataType.Top),
         ),
-        uiList = (20..100).map { TestData(it) }
+        uiList = (20..100).map { TestData(it) },
+        longClickDrag = {
+            touchHelper?.startDrag(it)
+        }
     ) }
     private val itemDecoration by lazy {             TestItemDecoration(testAdapter, this)
     }
+    private var touchHelper:TestItemTouchHelper? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                }
             ).apply {
                 attachToRecyclerView(this@with)
+                touchHelper = this
             }
 
 

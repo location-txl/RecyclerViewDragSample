@@ -28,9 +28,10 @@ class DragTouchHelper(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        if(viewHolder is TestAdapter.PayloadViewHolder){
-            return makeMovementFlags(0, 0)
-        }
+
+//        if(viewHolder is TestAdapter.PayloadViewHolder){
+//            return makeMovementFlags(0, 0)
+//        }
         return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0)
     }
 
@@ -85,7 +86,7 @@ class DragTouchHelper(
 
 
     override fun isLongPressDragEnabled(): Boolean {
-        return true
+        return false
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -106,8 +107,8 @@ class DragTouchHelper(
             selectedViewHolder = viewHolder
             addSelectToHeader = false
             viewHolder?.let {
-//                it.itemView.scaleX = 1.2f
-//                it.itemView.scaleY = 1.2f
+                it.itemView.scaleX = 1.2f
+                it.itemView.scaleY = 1.2f
             }
         }else if(selectedViewHolder != null && actionState == ItemTouchHelper.ACTION_STATE_IDLE){
             selectedViewHolder?.let {
